@@ -3,6 +3,9 @@
 This repository contains a complete, production-ready Retrieval-Augmented Generation (RAG) system designed to answer questions from a private knowledge base of documents. It features a sophisticated hybrid retrieval pipeline, multi-provider LLM generation for robustness, and is fully containerized for deployment.
 
 
+
+---
+
 ## 📋 Core Features
 
 -   **Hybrid Retrieval Pipeline**: Combines the strengths of keyword-based search (BM25) and semantic vector search (FAISS) using Reciprocal Rank Fusion (RRF) to retrieve the most relevant document chunks. Hybrid is optional; dense-only works out of the box.
@@ -264,7 +267,6 @@ A comprehensive human evaluation rubric is available at `docs/human_evaluation_r
 4. ✅ **Multi-Provider Fallback**: 100% uptime with Gemini → OpenAI → OpenRouter
 5. ✅ **Citation System**: [C#] tags enable answer verification
 6. ✅ **Fast**: 2.1s average end-to-end (retrieval + generation)
-
 
 ## 🎯 Technical Decisions & Trade-offs
 
@@ -695,9 +697,10 @@ See detailed explanations in `src/preprocessing/normalizer.py` and `src/preproce
 ## 🔗 Deliverables
 
 - [x] Complete codebase with modular architecture
-- [ ] Working deployed application
-- [ ] README with findings and trade-offs
-- [ ] Evaluation results and metrics
+- [x] Working deployed application
+- [x] README with findings and trade-offs
+- [x] Evaluation results and metrics
 
 ---
+
 
