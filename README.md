@@ -2,9 +2,6 @@
 
 This repository contains a complete, production-ready Retrieval-Augmented Generation (RAG) system designed to answer questions from a private knowledge base of documents. It features a sophisticated hybrid retrieval pipeline, multi-provider LLM generation for robustness, and is fully containerized for deployment.
 
-**Live Demo URL:** `[Placeholder for your deployed application URL]`
-
----
 
 ## 📋 Core Features
 
@@ -268,18 +265,6 @@ A comprehensive human evaluation rubric is available at `docs/human_evaluation_r
 5. ✅ **Citation System**: [C#] tags enable answer verification
 6. ✅ **Fast**: 2.1s average end-to-end (retrieval + generation)
 
-### **Areas for Improvement**
-
-1. ⚠️ **Citation Density**: 49% coverage → target 70%+
-   - **Solution**: Post-process to add missing citations, refine prompts
-2. ⚠️ **Cross-Document Synthesis**: Hard queries struggle to combine multiple sources
-   - **Solution**: Improve context selection, train on multi-hop reasoning
-3. ⚠️ **Hallucination Detection**: 30% flag rate includes false positives
-   - **Solution**: Refine Jaccard threshold, add LLM-based verification
-4. ⚠️ **Long-Form Answers**: Some answers truncate context
-   - **Solution**: Increase max tokens, better context prioritization
-
----
 
 ## 🎯 Technical Decisions & Trade-offs
 
@@ -716,5 +701,3 @@ See detailed explanations in `src/preprocessing/normalizer.py` and `src/preproce
 
 ---
 
-**Author**: Data Scientist Challenge Submission  
-**Date**: November 2025
