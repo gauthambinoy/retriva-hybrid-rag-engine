@@ -1,38 +1,38 @@
 # ==============================================================================
 # DATA LOADING & PREPROCESSING
 # ==============================================================================
-pandas>=2.0
-openpyxl>=3.1    # for .xlsx
-xlrd>=2.0.1      # for .xls
-python-docx>=0.8.11
-PyPDF2>=3.0      # for PDF files
+pandas==2.0
+openpyxl==3.1    # for .xlsx
+xlrd==2.0.1      # for .xls
+python-docx==0.8.11
+PyPDF2==3.0      # for PDF files
 
 # ==============================================================================
 # EMBEDDINGS & RETRIEVAL
 # ==============================================================================
-sentence-transformers>=2.2.0  # For generating embeddings
-faiss-cpu>=1.7.4              # Vector similarity search
-numpy>=1.24.0                 # Array operations
+sentence-transformers==2.2.0  # For generating embeddings
+faiss-cpu==1.7.4              # Vector similarity search
+numpy==1.24.0                 # Array operations
 
 # ==============================================================================
 # LLM GENERATION
 # ==============================================================================
-openai>=1.0.0                 # OpenAI API for GPT models
-anthropic>=0.7.0              # Anthropic Claude API (optional)
-python-dotenv>=1.0.0          # Environment variable management
-google-generativeai>=0.3.0    # Google Gemini API client
-requests>=2.31.0              # HTTP fallback (OpenRouter)
+openai==1.0.0                 # OpenAI API for GPT models
+anthropic==0.7.0              # Anthropic Claude API (optional)
+python-dotenv==1.0.0          # Environment variable management
+google-generativeai==0.3.0    # Google Gemini API client
+requests==2.31.0              # HTTP fallback (OpenRouter)
 
 # ==============================================================================
 # WEB DEPLOYMENT
 # ==============================================================================
-fastapi>=0.104.0              # REST API framework
-uvicorn>=0.24.0               # ASGI server
-pydantic>=2.0.0               # Data validation
-streamlit>=1.39.0             # Modern UI dashboard
+fastapi==0.104.0              # REST API framework
+uvicorn==0.24.0               # ASGI server
+pydantic==2.0.0               # Data validation
+streamlit==1.39.0             # Modern UI dashboard
 
 # ==============================================================================
 # EVALUATION & UTILITIES
 # ==============================================================================
-scikit-learn>=1.3.0           # Metrics for evaluation
-tqdm>=4.66.0                  # Progress bars
+scikit-learn==1.3.0           # Metrics for evaluation
+tqdm==4.66.0                  # Progress bars
