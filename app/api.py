@@ -38,9 +38,9 @@ from src.pipeline import create_pipeline_from_saved
 # CONFIGURATION
 # ==============================================================================
 
-APP_NAME = "RAG System API"
+APP_NAME = "Retriva API"
 APP_VERSION = "1.0.0"
-APP_DESCRIPTION = "Retrieval-Augmented Generation for Document Q&A"
+APP_DESCRIPTION = "Retriva — Hybrid RAG Engine for Document Q&A"
 
 # ==============================================================================
 # REQUEST/RESPONSE MODELS

@@ -1,4 +1,4 @@
-# Advanced RAG System
+# Retriva — Hybrid RAG Engine
 
 > Production-ready Retrieval-Augmented Generation for Enterprise Q&A
 
@@ -7,9 +7,9 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green?logo=fastapi)](https://fastapi.tiangolo.com)
 [![Gemini](https://img.shields.io/badge/LLM-Gemini%202.5%20Flash-orange?logo=google)](https://ai.google.dev)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![CI](https://github.com/gauthambinoy/advanced-rag-system/actions/workflows/ci.yml/badge.svg)](https://github.com/gauthambinoy/advanced-rag-system/actions/workflows/ci.yml)
+[![CI](https://github.com/gauthambinoy/retriva-hybrid-rag-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/gauthambinoy/retriva-hybrid-rag-engine/actions/workflows/ci.yml)
 
-A complete, production-grade RAG system that answers questions from a private document knowledge base. Features hybrid BM25 + FAISS retrieval, cross-encoder reranking, semantic caching, multi-format document ingestion, and a FastAPI REST interface with an interactive Streamlit UI.
+Retriva is a production-grade hybrid RAG engine that answers questions from a private document knowledge base. Features BM25 + FAISS retrieval, cross-encoder reranking, semantic caching, multi-format document ingestion, and a FastAPI REST interface with an interactive Streamlit UI.
 
 ---
 
@@ -70,8 +70,8 @@ Answer + [Source: file.pdf, Page: N]
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/gauthambinoy/advanced-rag-system.git
-cd advanced-rag-system
+git clone https://github.com/gauthambinoy/retriva-hybrid-rag-engine.git
+cd retriva-hybrid-rag-engine
 cp .env.example .env          # add your GEMINI_API_KEY
 docker build -t rag-system .
 docker run -p 8000:8000 --env-file .env rag-system
@@ -80,8 +80,8 @@ docker run -p 8000:8000 --env-file .env rag-system
 ### Manual Setup
 
 ```bash
-git clone https://github.com/gauthambinoy/advanced-rag-system.git
-cd advanced-rag-system
+git clone https://github.com/gauthambinoy/retriva-hybrid-rag-engine.git
+cd retriva-hybrid-rag-engine
 
 python3 -m venv .venv
 source .venv/bin/activate       # Windows: .venv\Scripts\activate
@@ -151,7 +151,7 @@ Interactive Swagger UI.
 ## Project Structure
 
 ```
-advanced-rag-system/
+retriva-hybrid-rag-engine/
 ├── app/
 │   ├── api.py              # FastAPI REST API
 │   └── dashboard.py        # Streamlit chat UI

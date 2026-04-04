@@ -20,7 +20,7 @@ from src.queries.test_queries import get_all_queries
 
 
 # Page config
-st.set_page_config(page_title="RAG – Minimal UI", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Retriva", page_icon="🧠", layout="wide")
 
 
 @st.cache_resource(show_spinner="Loading RAG pipeline…")
@@ -46,7 +46,7 @@ def load_question_labels():
 pipeline = load_pipeline()
 queries, labels = load_question_labels()
 
-st.title("🧠 RAG – Minimal Evaluation UI")
+st.title("🔍 Retriva — Hybrid RAG Engine")
 st.caption("Select a question below and click Run. Only the answer is shown.")
 
 # Single radio with all questions (category included in label)
