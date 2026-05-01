@@ -1,8 +1,7 @@
 name: Build and Push to ECR
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   id-token: write   # for GitHub OIDC
@@ -15,7 +14,6 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    if: vars.ENABLE_AWS_ECR_PUSH == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
