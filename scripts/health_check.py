@@ -51,8 +51,12 @@ try:
         r_stats = client.get("/stats")
         if r_stats.status_code == 200:
             stats = r_stats.json()
-            total_vectors = stats.get("retriever", {}).get("total_vectors") or stats.get("total_vectors")
-            print("✓ Health OK | vectors:", total_vectors)
+            total_vectors = (
+                stats.get("retriever", {}).get("total_vectors")
+                or stats.get("total_vectors")
+                or stats.get("num_documents")
+            )
+            print("✓ Health OK | indexed items:", total_vectors)
         else:
             print("✓ Health OK (stats unavailable)")
         sys.exit(0)

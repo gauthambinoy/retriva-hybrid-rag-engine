@@ -1,5 +1,5 @@
 # ==============================================================================
-# FILE: app.py  
+# FILE: api.py
 # PURPOSE: FastAPI application for RAG system deployment
 # ==============================================================================
 
@@ -14,7 +14,7 @@ ENDPOINTS:
 
 USAGE:
     # Run locally
-    uvicorn app:app --reload --port 8000
+    uvicorn app.api:app --reload --port 8000
     
     # Test
     curl -X POST http://localhost:8000/query \
@@ -100,11 +100,18 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS middleware (allow all origins for demo)
+def _cors_origins() -> list[str]:
+    """Read CORS origins from env; defaults to demo-friendly wildcard."""
+    raw = os.getenv("CORS_ORIGINS", "*")
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return origins or ["*"]
+
+
+# CORS middleware. Set CORS_ORIGINS to exact domains for production.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins(),
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -123,15 +130,8 @@ async def startup_event():
     print(f"{'='*80}")
     
     try:
-        # Check for any provider key (Gemini, OpenAI, or OpenRouter)
-        has_any_key = any([
-            os.getenv('GEMINI_API_KEY'),
-            os.getenv('OPENAI_API_KEY'),
-            os.getenv('OPENAI_API_KEYS'),
-            os.getenv('OPENROUTER_API_KEY'),
-        ])
-        if not has_any_key:
-            print("⚠ WARNING: No LLM API keys set (GEMINI/OPENAI/OPENROUTER)")
+        if not os.getenv('GEMINI_API_KEY'):
+            print("⚠ WARNING: GEMINI_API_KEY is not set")
             print("You can still start the API, but generation will fail until a key is provided.")
         
         # Load pipeline
@@ -227,11 +227,11 @@ if __name__ == "__main__":
     import uvicorn
     
     print("Starting RAG API server...")
-    print("Make sure at least one LLM key is set (GEMINI_API_KEY / OPENAI_API_KEY(S) / OPENROUTER_API_KEY)")
+    print("Set GEMINI_API_KEY for live answer generation.")
     print()
     
     uvicorn.run(
-        "app:app",
+        "app.api:app",
         host="0.0.0.0",
         port=8000,
         reload=True

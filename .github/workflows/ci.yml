@@ -28,7 +28,10 @@ jobs:
       - name: Lint with ruff
         run: |
           pip install ruff
-          ruff check src/ app/ --ignore E501,E402 || true
+          # Advisory until legacy style issues are cleaned up; tests below are blocking.
+          ruff check src/ app/ --ignore E501,E402 --exit-zero
 
       - name: Run tests
-        run: pytest tests/ -v --tb=short || echo "No tests collected"
+        env:
+          RAG_DISABLE_EMBEDDINGS: "1"
+        run: pytest tests/ -v --tb=short

@@ -8,7 +8,7 @@ This module handles LLM API integration for answer generation.
 
 WHAT THIS MODULE DOES:
 - Takes retrieved context + user query
-- Sends to LLM (OpenAI GPT) with carefully crafted prompt
+- Sends retrieved context to Gemini with a carefully crafted prompt
 - Returns generated answer
 
 THIS IS THE "G" IN RAG (Retrieval-Augmented Generation)
@@ -50,7 +50,7 @@ PROMPT ENGINEERING STRATEGY:
 USAGE:
     from src.generation.llm_interface import LLMInterface
     
-    # Initialize (requires OPENAI_API_KEY environment variable)
+    # Initialize (requires GEMINI_API_KEY environment variable for live generation)
     llm = LLMInterface()
     
     # Generate answer
@@ -254,10 +254,9 @@ def estimate_cost(tokens_used: Dict, model: str = DEFAULT_MODEL) -> float:
     """
     Estimate API cost based on token usage.
     
-    PRICING (as of 2024):
-        gpt-3.5-turbo: $0.0015/1K input, $0.002/1K output
-        gpt-4: $0.03/1K input, $0.06/1K output
-        gpt-4-turbo: $0.01/1K input, $0.03/1K output
+    NOTE: This helper is retained for older evaluation utilities. Live generation
+    uses Gemini and currently returns provider metadata rather than exact token
+    accounting.
     
     PARAMETERS:
         tokens_used (Dict): Token counts from generate_answer

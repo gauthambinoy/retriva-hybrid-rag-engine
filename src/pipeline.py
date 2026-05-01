@@ -93,9 +93,8 @@ class RAGPipeline:
         Initialize RAG pipeline.
         
         PARAMETERS:
-            openai_api_key (str, optional): OpenAI API key
-                If None, reads from OPENAI_API_KEY environment variable
-            llm_model (str): LLM model name (default: "gpt-3.5-turbo")
+            openai_api_key (str, optional): Deprecated; use GEMINI_API_KEY in the environment
+            llm_model (str): Gemini model name (default: "gemini-2.5-flash")
             temperature (float): LLM temperature (default: 0.1)
             use_semantic_cache (bool): Enable semantic query caching (default: True)
         
@@ -126,7 +125,7 @@ class RAGPipeline:
             self.retriever.dense_enabled = False
             self.retriever.embedding_model = None
         
-        # Initialize LLM (multi-provider fallback handled inside)
+        # Initialize Gemini LLM interface
         if verbose_init:
             print(f"\n[2/2] Initializing Generation Component...")
         if openai_api_key:
@@ -349,6 +348,9 @@ class RAGPipeline:
                 'retrieved_chunks': [],
                 'num_chunks': 0,
                 'relevance_scores': [],
+                'model': getattr(self.llm, 'model_name', 'unknown'),
+                'provider': 'gemini',
+                'tokens_used': {'total_tokens': 0},
                 'cache_hit': False
             }
             
@@ -472,7 +474,7 @@ class RAGPipeline:
 # ==============================================================================
 
 def create_pipeline_from_saved(
-    openai_api_key: Optional[str] = None
+        openai_api_key: Optional[str] = None
 ) -> RAGPipeline:
     """
     Create RAG pipeline with pre-built index (fastest startup).
@@ -480,7 +482,7 @@ def create_pipeline_from_saved(
     USE CASE: Production deployment - just load and go
     
     PARAMETERS:
-        openai_api_key (str, optional): OpenAI API key
+        openai_api_key (str, optional): Deprecated; use GEMINI_API_KEY in the environment
     
     RETURNS:
         RAGPipeline: Ready-to-use pipeline
@@ -503,11 +505,11 @@ if __name__ == "__main__":
     Test the complete RAG pipeline.
     
     NOTE: Requires:
-    1. Pre-built index (run tests/test_retrieval.py first)
-    2. OPENAI_API_KEY environment variable
+    1. Pre-built index (run scripts/build_index.py if outputs are absent)
+    2. GEMINI_API_KEY environment variable
     
     Run:
-        export OPENAI_API_KEY="sk-..."
+        export GEMINI_API_KEY="your-key"
         python src/pipeline.py
     """
     
@@ -516,11 +518,11 @@ if __name__ == "__main__":
     print("="*80)
     
     # Check for API key
-    if not os.getenv('OPENAI_API_KEY'):
-        print("\n⚠ OPENAI_API_KEY not set!")
+    if not os.getenv('GEMINI_API_KEY'):
+        print("\n⚠ GEMINI_API_KEY not set!")
         print("Set it to test the complete RAG pipeline:")
-        print("  export OPENAI_API_KEY='your-key-here'")
-        print("\nYou can get a key from: https://platform.openai.com/api-keys")
+        print("  export GEMINI_API_KEY='your-key-here'")
+        print("\nYou can get a key from: https://aistudio.google.com/app/apikey")
         print("\nSkipping test...")
         exit(0)
     

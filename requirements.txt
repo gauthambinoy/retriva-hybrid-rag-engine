@@ -36,3 +36,10 @@ streamlit>=1.39.0             # Modern UI dashboard
 # ==============================================================================
 scikit-learn>=1.3.0           # Metrics for evaluation
 tqdm>=4.66.0                  # Progress bars
+nltk>=3.8.1                   # Sentence tokenization for smart chunking
+
+# ==============================================================================
+# TESTING / HEALTH CHECKS
+# ==============================================================================
+pytest>=8.0.0                 # Existing test suite and CI
+httpx>=0.27.0                 # FastAPI TestClient used by scripts/health_check.py

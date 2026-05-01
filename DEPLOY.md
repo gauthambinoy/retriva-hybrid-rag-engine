@@ -1,140 +1,112 @@
-# Cloud Deployment Guide
+# Deployment Guide
 
-This project ships with a Dockerfile and a FastAPI server. Below are three quick deployment options.
+Retriva ships as a Dockerized FastAPI app. The saved demo indexes in `outputs/embeddings/` are copied into the image, so the API can start without rebuilding indexes on every deploy.
 
-## Option A: Render (free tier)
+## Required secret
 
-1. Push your repo to GitHub.
-2. Create a new Web Service in Render:
-   - Connect GitHub repo.
-   - Runtime: Docker
-   - Build Command: (leave empty, Docker builds automatically)
-   - Start Command: `uvicorn app.api:app --host 0.0.0.0 --port 8000`
-   - Add Environment Variable: `GEMINI_API_KEY=...`
-3. Click Deploy. When live, visit the URL and check `/docs` and `/health`.
+Set this as a hosting-platform environment variable/secret:
+
+```bash
+GEMINI_API_KEY=your_google_ai_studio_key
+```
+
+Get a free Gemini key from <https://aistudio.google.com/app/apikey>. Do not commit real keys.
+
+Optional environment variables:
+
+```bash
+MODEL_NAME=gemini-2.5-flash
+RAG_ENABLE_RERANKER=0
+RAG_DISABLE_EMBEDDINGS=0
+CORS_ORIGINS=*
+LOG_LEVEL=INFO
+```
+
+## Local Docker smoke test
+
+```bash
+cp .env.example .env   # then edit GEMINI_API_KEY
+docker build -t retriva-rag .
+docker run --env-file .env -p 8000:8000 retriva-rag
+curl http://localhost:8000/health
+```
+
+Open <http://localhost:8000/docs> for Swagger UI.
+
+## Option A — Render Web Service (simple/free-to-start)
+
+1. Push the repo to GitHub.
+2. Render → **New** → **Web Service** → connect this repository.
+3. Runtime: **Docker**.
+4. Start command: leave blank; the Dockerfile starts `uvicorn` and respects Render's `PORT`.
+5. Add environment variables:
+   - `GEMINI_API_KEY`: your key
+   - `MODEL_NAME`: `gemini-2.5-flash`
+   - `RAG_ENABLE_RERANKER`: `0` for lower memory/latency
+   - `CORS_ORIGINS`: your UI domain or `*` for API-only demos
+6. Deploy.
+7. Verify:
+
+```bash
+curl https://<render-service>.onrender.com/health
+```
 
 Notes:
-- Persisted indices: mount a persistent disk or rebuild on startup by running `scripts/build_index.py` in a pre-start hook.
+- Render free instances may cold-start and may have memory limits. Keep reranking off for the first deploy.
+- If you replace the document corpus, rebuild indexes locally and commit the updated `outputs/embeddings/` artifacts, or add a deploy build step that runs `python scripts/build_index.py`.
 
-## Option B: Azure Container Apps
+## Option B — Railway/Fly.io/other Docker hosts
 
-1. Build and push image
+Use the same Docker image settings:
+
+- Exposed port: `8000` internally, or platform-provided `$PORT`.
+- Health path: `/health`.
+- Required secret: `GEMINI_API_KEY`.
+- Start command is already in the Dockerfile.
+
+Verify `/health` and `/docs` after deploy.
+
+## Option C — AWS App Runner via GitHub Actions
+
+This repo includes:
+
+- `.github/workflows/ecr-push.yml` — builds and pushes the Docker image to ECR on `main`.
+- `.github/workflows/deploy-apprunner.yml` — manually deploys/updates App Runner via CloudFormation.
+- `aws/app-runner-service.yaml` — App Runner service template.
+
+Prerequisites:
+
+1. AWS account and ECR repository named `rag` in `eu-west-1`, or edit workflow env values.
+2. GitHub repository variable `AWS_ROLE_TO_ASSUME` with an OIDC role ARN.
+3. GitHub secret `GEMINI_API_KEY`.
+4. OIDC role permissions for ECR push/read, CloudFormation deploy, App Runner create/update, and scoped `iam:PassRole`.
+
+Deploy flow:
+
+1. Push to `main` to run **Build and Push to ECR**.
+2. GitHub Actions → **Deploy App Runner** → **Run workflow**.
+3. Use latest image tag or provide a specific tag.
+4. Verify the output service URL:
 
 ```bash
-# Build
-docker build -t your-docker-username/rag-system:latest .
-# Login
-az acr login --name <your-acr-name>
-# Tag and push
-docker tag your-docker-username/rag-system:latest <your-acr-name>.azurecr.io/rag-system:latest
-docker push <your-acr-name>.azurecr.io/rag-system:latest
+curl https://<apprunner-url>/health
+curl https://<apprunner-url>/docs
 ```
 
-2. Deploy container app
+## Health verification
 
-```bash
-az containerapp create \
-  --name rag-system \
-  --resource-group <rg> \
-  --environment <env> \
-  --image <your-acr-name>.azurecr.io/rag-system:latest \
-  --target-port 8000 \
-  --ingress external \
-  --env-vars GEMINI_API_KEY=your_gemini_key_here
-```
-
-3. Test
-
-```bash
-curl -s https://<app-domain>/health
-```
-
-## Option C: AWS App Runner (recommended)
-
-Fully managed HTTPS + autoscaling. Integrated CI here pushes images to ECR and can deploy App Runner via CloudFormation.
-
-Prereqs
-- AWS account ID (you provided: `920822856790`)
-- Region (we use: `eu-west-1`)
-- GitHub OIDC IAM role with ECR + CloudFormation + App Runner permissions; store its ARN in repository variable `AWS_ROLE_TO_ASSUME`
-- GitHub secret `GEMINI_API_KEY`
-
-### 1. Image Build & Push (Automatic on each push to `main`)
-Workflow: `.github/workflows/ecr-push.yml` (already created)
-Action: When you push to `main`, it:
-1. Assumes `AWS_ROLE_TO_ASSUME` via OIDC
-2. Builds Docker image
-3. Tags `rag:main-<commit-sha>`
-4. Pushes to `920822856790.dkr.ecr.eu-west-1.amazonaws.com/rag`
-
-Manual trigger alternative if needed:
-```bash
-export AWS_REGION=eu-west-1
-export AWS_ACCOUNT_ID=920822856790
-export ECR_REPO=rag
-IMAGE_TAG=manual-$(date +%Y%m%d%H%M)
-aws ecr create-repository --repository-name "$ECR_REPO" --region "$AWS_REGION" || true
-aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID".dkr.ecr."$AWS_REGION".amazonaws.com
-docker build -t "$ECR_REPO:$IMAGE_TAG" .
-docker tag "$ECR_REPO:$IMAGE_TAG" "$AWS_ACCOUNT_ID".dkr.ecr."$AWS_REGION".amazonaws.com/"$ECR_REPO:$IMAGE_TAG"
-docker push "$AWS_ACCOUNT_ID".dkr.ecr."$AWS_REGION".amazonaws.com/"$ECR_REPO:$IMAGE_TAG"
-```
-
-### 2. Deploy / Update App Runner Service
-Workflow: `.github/workflows/deploy-apprunner.yml` (manual dispatch)
-Steps:
-1. In GitHub → Actions → Deploy App Runner → Run workflow
-2. (Optional) Provide `image_tag` (else it finds the latest pushed)
-3. Workflow deploys CloudFormation template `aws/app-runner-service.yaml` creating/updating:
-   - IAM role granting App Runner pull access to ECR
-   - App Runner service with env vars (`GEMINI_API_KEY`, `MODEL_NAME`, `LOG_LEVEL`, `RAG_ENABLE_RERANKER`)
-4. Outputs the public service URL.
-
-### 3. Verify
-```bash
-curl -s https://<service-url>/health
-curl -s https://<service-url>/docs
-```
-
-### 4. Custom Domain (Optional)
-1. Request ACM certificate in `eu-west-1` for `yourdomain.com` + `api.yourdomain.com`
-2. Validate via Route 53 CNAMEs
-3. App Runner → Custom domains → Add domain → Attach certificate → Add CNAME record pointing to target
-4. Wait status `Active`; re-test `/health`.
-
-### 5. Required Permissions Summary for OIDC Role
-Attach policy with:
-- `ecr:GetAuthorizationToken`, `ecr:BatchGetImage`, `ecr:GetDownloadUrlForLayer`
-- `ecr:DescribeImages`
-- `cloudformation:CreateStack`, `cloudformation:UpdateStack`, `cloudformation:DescribeStacks`
-- `apprunner:CreateService`, `apprunner:UpdateService`, `apprunner:DescribeService`, `apprunner:ListServices`
-- `iam:PassRole` (scoped to the created App Runner ECR access role ARN pattern)
-
-### 6. After First Deploy
-Update `SUBMISSION.md` live URLs:
-- API: `<service-url>/docs`
-- Health: `<service-url>/health`
-
-### Troubleshooting
-| Symptom | Fix |
-|---------|-----|
-| ECR image not found | Ensure ecr-push workflow ran and repository `rag` exists. |
-| CloudFormation failure on IAM | Check OIDC role has `CAPABILITY_NAMED_IAM` permission and `iam:PassRole`. |
-| 502 errors | Confirm health path `/health` reachable locally and service port set to 8000. |
-| Missing Gemini key | Set `GEMINI_API_KEY` secret in GitHub before dispatching deploy workflow. |
-
-## Health Verification
-
-Locally, you can verify the API and pipeline without starting a server using:
+Without starting a public server:
 
 ```bash
 python scripts/health_check.py
 ```
 
-It initializes the FastAPI app, loads the saved indices under `outputs/`, and checks `/health` and `/stats`. Exit code 0 indicates readiness.
+This imports the FastAPI app, triggers startup, loads saved indexes, then checks `/health` and `/stats`.
 
-## Tips
+## Portfolio launch checklist
 
-- Ensure `outputs/embeddings` is available or run `python scripts/build_index.py` at least once with your documents in `data/raw_documents`.
-- Set `RAG_ENABLE_RERANKER=1` if you want higher precision results (adds latency).
-- Use `STREAMLIT_SERVER_PORT=8501` to run the Streamlit dashboard in cloud environments where default ports are blocked.
+1. Confirm CI is green on GitHub.
+2. Deploy the Docker API and verify `/health`.
+3. Add the live `/docs` URL to `README.md`.
+4. Record a short GIF/screenshot of `/docs` or the Streamlit UI and add it under `docs/assets/`.
+5. Pin the repo and add GitHub topics: `rag`, `llm`, `fastapi`, `faiss`, `bm25`, `gemini`, `docker`, `llmops`.
